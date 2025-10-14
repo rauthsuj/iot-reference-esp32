@@ -253,9 +253,14 @@ menu "Featured FreeRTOS IoT Integration"
 
     endmenu # coreMQTT-Agent Manager Configurations
 
+    config GRI_ENABLE_QUICKCONNECT_V2_DEMO
+        bool "Enable QuickConnect V2 demo"
+        depends on !GRI_RUN_QUALIFICATION_TEST
+        default n
+
     config GRI_ENABLE_SUB_PUB_UNSUB_DEMO
         bool "Enable pub sub unsub demo"
-        depends on !GRI_RUN_QUALIFICATION_TEST
+        depends on !GRI_RUN_QUALIFICATION_TEST && !GRI_ENABLE_QUICKCONNECT_V2_DEMO
         default y
 
     menu "Sub pub unsub demo configurations"
@@ -308,7 +313,7 @@ menu "Featured FreeRTOS IoT Integration"
 
     config GRI_ENABLE_TEMPERATURE_PUB_SUB_AND_LED_CONTROL_DEMO
         bool "Enable temperature sensor pub sub and LED control demo"
-        depends on !GRI_RUN_QUALIFICATION_TEST
+        depends on !GRI_RUN_QUALIFICATION_TEST && !GRI_ENABLE_QUICKCONNECT_V2_DEMO
         default y
 
     menu "Temperature pub sub and LED control demo configurations"
@@ -378,7 +383,7 @@ menu "Featured FreeRTOS IoT Integration"
 
     config GRI_ENABLE_OTA_DEMO
         bool "Enable OTA demo"
-        depends on !GRI_RUN_QUALIFICATION_TEST
+        depends on !GRI_RUN_QUALIFICATION_TEST && !GRI_ENABLE_QUICKCONNECT_V2_DEMO
         default y
 
     menu "OTA demo configurations"

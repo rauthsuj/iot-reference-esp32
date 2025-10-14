@@ -13,6 +13,14 @@ if(CONFIG_GRI_ENABLE_SUB_PUB_UNSUB_DEMO)
     list(APPEND MAIN_SRCS "demo_tasks/sub_pub_unsub_demo/sub_pub_unsub_demo.c")
 endif()
 
+# QuickConnect V2 demo
+if(CONFIG_GRI_ENABLE_QUICKCONNECT_V2_DEMO)
+    list(APPEND MAIN_SRCS 
+        "demo_tasks/quickconnect_v2_demo/quickconnect_v2_demo.c"
+        "demo_tasks/temp_sub_pub_and_led_control_demo/hardware_drivers/app_driver.c"
+    )
+endif()
+
 # Temperature Sub Pub and LED control demo
 if(CONFIG_GRI_ENABLE_TEMPERATURE_PUB_SUB_AND_LED_CONTROL_DEMO)
     list(APPEND MAIN_SRCS
@@ -37,6 +45,7 @@ set(MAIN_INCLUDE_DIRS
     "."
     "demo_tasks/ota_over_mqtt_demo"
     "demo_tasks/sub_pub_unsub_demo"
+    "demo_tasks/quickconnect_v2_demo"
     "demo_tasks/temp_sub_pub_and_led_control_demo"
     "demo_tasks/temp_sub_pub_and_led_control_demo/hardware_drivers"
     "networking/wifi"
