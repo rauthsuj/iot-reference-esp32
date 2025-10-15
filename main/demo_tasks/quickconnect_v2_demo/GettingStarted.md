@@ -24,11 +24,11 @@ For hardware and software requirements, refer to sections [1.1 Hardware Requirem
 
 ### 2.1 Get credentials from Quick Connect V2
 
-To get credentials for your device (Thing), visit [Quick Connect Credentials](https://quickconnect.iot.aws.dev/credentials) page and enter a desired device name (Thing Name) in the `Vend Credentials` section, and click the Vend button. Download both the `.crt` and `.key` files. These are your **PEM-encoded device certificate** and **PEM-encoded private key**. (An explanation of these entities is given in the [AWS IoT Core Setup Guide](AWSSetup.md).)
+To get credentials for your device (Thing), visit [Quick Connect Credentials](https://quickconnect.freertos.aws.com/credentials) page and enter a desired device name (Thing Name) in the `Vend Credentials` section, and click the Vend button. Download both the `.crt` and `.key` files. These are your **PEM-encoded device certificate** and **PEM-encoded private key**. (An explanation of these entities is given in the [AWS IoT Core Setup Guide](AWSSetup.md).)
 
 ### 2.2 Configure the project with the AWS IoT Thing Name and AWS device Endpoint
 
-The **AWS device Endpoint** is provided on the [Quick Connect Examples](https://quickconnect.iot.aws.dev) page.
+The **AWS device Endpoint** is provided on the [Quick Connect Examples](https://quickconnect.freertos.aws.com/examples) page.
 
 Follow the [2.2 Configure the project](../../../GettingStartedGuide.md#22-configure-the-project-with-the-aws-iot-thing-name-and-aws-device-endpoint) section in the [Getting Started Guide](../../../GettingStartedGuide.md) to configure your project.
 
@@ -48,6 +48,9 @@ For complete provisioning instructions, follow the [2.3 Provision the ESP32-C3](
 ## 3 Build and flash the demo project
 
 For build and flash instructions, follow [3 Build and flash](../../../GettingStartedGuide.md#3-build-and-flash-the-demo-project) section of the [Getting Started Guide](../../../GettingStartedGuide.md).
+
+**NOTE:** If you encounter a ***stack overflow in task CoreMqttAgentCo has been detected*** <br>
+run `idf.py menuconfig`. navigate to Featured FreeRTOS IoT Integration → coreMQTT-Agent Manager Configurations, and increse the `coreMQTT-Agent task stack size` and `Connection handling task stack size` from their default values.
 
 ## 4 Monitoring the demo
 
@@ -72,6 +75,6 @@ I (5175) coreMQTT: State record updated. New state=MQTTPublishDone.
 
 ```
 
-2. On the [Quick Connect Visualizer](https://quickconnect.iot.aws.dev/visualizer) page, enter your device name (Thing name) in the `Visualizing device data` section, then confirm that the MQTT messages from the device are being received and a graph is being displayed.
+2. On the [Quick Connect Visualizer](https://quickconnect.freertos.aws.com/visualizer) page, enter your device name (Thing name) in the `Visualizing device data` section, then confirm that the MQTT messages from the device are being received and a graph is being displayed.
 
-**Note**: This demo sends data in line graph format only. For other data visualization formats, refer to the [Quick Connect](https://quickconnect.iot.aws.dev/) documentation.
+**Note**: This demo sends data in line graph format only. For other data visualization formats, refer to the [Quick Connect](https://quickconnect.freertos.aws.com/examples) documentation.

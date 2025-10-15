@@ -30,10 +30,6 @@
 /* ESP-IDF sdkconfig include. */
 #include <sdkconfig.h>
 
-#if CONFIG_GRI_RUN_QUALIFICATION_TEST
-    #include "qualification_wrapper_config.h"
-#endif /* CONFIG_GRI_RUN_QUALIFICATION_TEST */
-
 /* *INDENT-OFF* */
     #ifdef __cplusplus
         extern "C" {
@@ -44,41 +40,24 @@
  * @brief Size of statically allocated buffers for holding topic names and
  * payloads.
  */
-#define quickconnectv2configSTRING_BUFFER_LENGTH                    ( ( unsigned int ) ( CONFIG_GRI_SUB_PUB_UNSUB_DEMO_STRING_BUFFER_LENGTH ) )
+#define quickconnectv2configSTRING_BUFFER_LENGTH                    ( ( unsigned int ) ( CONFIG_GRI_QUICKCONNECT_V2_DEMO_STRING_BUFFER_LENGTH ) )
 
 /**
  * @brief Delay for each task between each publish.
  */
-#define quickconnectv2configDELAY_BETWEEN_LOOPS_MS    ( ( unsigned int ) ( CONFIG_GRI_SUB_PUB_UNSUB_DEMO_DELAY_BETWEEN_SUB_PUB_UNSUB_LOOPS_MS ) )
+#define quickconnectv2configDELAY_BETWEEN_LOOPS_MS    ( ( unsigned int ) ( CONFIG_GRI_QUICKCONNECT_V2_DEMO_DELAY_BETWEEN_PUB_LOOPS_MS ) )
 
 /**
  * @brief The maximum amount of time in milliseconds to wait for the commands
  * to be posted to the MQTT agent should the MQTT agent's command queue be full.
  * Tasks wait in the Blocked state, so don't use any CPU time.
  */
-#define quickconnectv2configMAX_COMMAND_SEND_BLOCK_TIME_MS          ( ( unsigned int ) ( CONFIG_GRI_SUB_PUB_UNSUB_DEMO_MAX_COMMAND_SEND_BLOCK_TIME_MS ) )
-
-/**
- * @brief The QoS level of MQTT messages sent by this demo. This must be 0 or 1
- * if using AWS as AWS only supports levels 0 or 1. If using another MQTT broker
- * that supports QoS level 2, this can be set to 2.
- */
-#define quickconnectv2configQOS_LEVEL                               ( ( unsigned long ) ( CONFIG_GRI_SUB_PUB_UNSUB_DEMO_QOS_LEVEL ) )
-
-/**
- * @brief The number of Quick Connect Demo tasks to create for this demo.
- */
-#define quickconnectv2configNUM_TASKS_TO_CREATE                     ( ( unsigned long ) ( CONFIG_GRI_SUB_PUB_UNSUB_DEMO_NUM_TASKS_TO_CREATE ) )
-
-/**
- * @brief The task priority of each of the Quick Connect Demo tasks.
- */
-#define quickconnectv2configTASK_PRIORITY                           ( ( unsigned int ) ( CONFIG_GRI_SUB_PUB_UNSUB_DEMO_TASK_PRIORITY ) )
+#define quickconnectv2configMAX_COMMAND_SEND_BLOCK_TIME_MS          ( ( unsigned int ) ( CONFIG_GRI_QUICKCONNECT_V2_DEMO_MAX_COMMAND_SEND_BLOCK_TIME_MS ) )
 
 /**
  * @brief The task stack size for each of the Quick Connect Demo tasks.
  */
-#define quickconnectv2configTASK_STACK_SIZE                         ( ( unsigned int ) ( CONFIG_GRI_SUB_PUB_UNSUB_DEMO_TASK_STACK_SIZE ) )
+#define quickconnectv2configTASK_STACK_SIZE                         ( ( unsigned int ) ( CONFIG_GRI_QUICKCONNECT_V2_DEMO_TASK_STACK_SIZE ) )
 
 /* *INDENT-OFF* */
     #ifdef __cplusplus

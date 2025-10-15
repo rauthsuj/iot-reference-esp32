@@ -258,6 +258,35 @@ menu "Featured FreeRTOS IoT Integration"
         depends on !GRI_RUN_QUALIFICATION_TEST
         default n
 
+    menu "Quick connect V2 demo configurations"
+        depends on GRI_ENABLE_QUICKCONNECT_V2_DEMO
+
+        config GRI_QUICKCONNECT_V2_DEMO_STRING_BUFFER_LENGTH
+            int "Topic name and payload buffer length"
+            default 700
+            help
+                Size of statically allocated buffers for holding topic names and payloads.
+
+        config GRI_QUICKCONNECT_V2_DEMO_DELAY_BETWEEN_PUB_LOOPS_MS
+            int "Delay between publish loops in milliseconds"
+            default 1000
+            help
+                Delay for each task between publish loops.
+
+        config GRI_QUICKCONNECT_V2_DEMO_MAX_COMMAND_SEND_BLOCK_TIME_MS
+            int "coreMQTT-Agent command post block time in milliseconds."
+            default 500
+            help
+                The maximum amount of time in milliseconds to wait for the commands to be posted to the MQTT agent should the MQTT agent's command queue be full. Tasks wait in the Blocked state, so don't use any CPU time.
+
+        config GRI_QUICKCONNECT_V2_DEMO_TASK_STACK_SIZE
+            int "Quick connect task stack size."
+            default 3072
+            help
+                The task stack size for each of the Quick Connect tasks.
+
+    endmenu # Quick connect V2 demo configurations
+
     config GRI_ENABLE_SUB_PUB_UNSUB_DEMO
         bool "Enable pub sub unsub demo"
         depends on !GRI_RUN_QUALIFICATION_TEST && !GRI_ENABLE_QUICKCONNECT_V2_DEMO

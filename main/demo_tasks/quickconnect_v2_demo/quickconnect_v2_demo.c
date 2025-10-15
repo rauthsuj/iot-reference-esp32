@@ -79,6 +79,7 @@
 
 /* Hardware drivers include. */
 #include "app_driver.h"
+#include "driver/temperature_sensor.h"
 
 /* coreMQTT-Agent manager configurations include. */
 #include "core_mqtt_agent_manager_config.h"
@@ -126,11 +127,11 @@ static const char * TAG = "quickconnect_v2_demo";
 extern MQTTAgentContext_t xGlobalMqttAgentContext;
 
 /**
- * @brief The buffer to hold the topic filter. The topic is generated at runtime
- * by adding the task names.
+ * @brief The buffer to hold the topic filter. 
+ Topic filter value will be the Thing-Name. 
  *
  */
-static char topicBuf[ quickconnectv2configNUM_TASKS_TO_CREATE ][ quickconnectv2configSTRING_BUFFER_LENGTH ];
+static char topicBuf[ 1 ][ quickconnectv2configSTRING_BUFFER_LENGTH ];
 
 /**
  * @brief The event group used to manage coreMQTT-Agent events.
@@ -138,15 +139,14 @@ static char topicBuf[ quickconnectv2configNUM_TASKS_TO_CREATE ][ quickconnectv2c
 static EventGroupHandle_t xNetworkEventGroup;
 
 /**
- * @brief The semaphore used to lock access to ulMessageID to eliminate a race
- * condition in which multiple tasks try to increment/get ulMessageID.
- */
-static SemaphoreHandle_t xMessageIdSemaphore;
-
-/**
  * @brief The message ID for the next message sent by this demo.
  */
 static uint32_t ulMessageId = 0;
+
+/**
+ * @brief Temperature sensor handle.
+ */
+static temperature_sensor_handle_t temp_sensor = NULL;
 
 /* Static function declarations ***********************************************/
 
@@ -264,8 +264,6 @@ static void prvPublishToTopic( MQTTQoS_t xQoS,
                                char * pcPayload,
                                EventGroupHandle_t xMqttEventGroup )
 {
-    uint32_t ulPublishMessageId = 0;
-
     MQTTStatus_t xCommandAdded;
     EventBits_t xReceivedEvent = 0;
 
@@ -276,18 +274,8 @@ static void prvPublishToTopic( MQTTQoS_t xQoS,
 
     xTaskNotifyStateClear( NULL );
 
-    /* Create a unique number for the publish that is about to be sent.
-     * This number is used in the command context and is sent back to this task
-     * as a notification in the callback that's executed upon receipt of the
-     * publish from coreMQTT-Agent.
-     * That way this task can match an acknowledgment to the message being sent.
-     */
-    xSemaphoreTake( xMessageIdSemaphore, portMAX_DELAY );
-    {
-        ++ulMessageId;
-        ulPublishMessageId = ulMessageId;
-    }
-    xSemaphoreGive( xMessageIdSemaphore );
+    /* Increment Message Id */
+    ++ulMessageId;
 
     /* Configure the publish operation. The topic name string must persist for
      * duration of publish! */
@@ -321,7 +309,7 @@ static void prvPublishToTopic( MQTTQoS_t xQoS,
                   pcTaskGetName( NULL ),
                   pcPayload,
                   pcTopicName,
-                  ulPublishMessageId );
+                  ulMessageId );
 
         xCommandAdded = MQTTAgent_Publish( &xGlobalMqttAgentContext,
                                            &xPublishInfo,
@@ -334,7 +322,7 @@ static void prvPublishToTopic( MQTTQoS_t xQoS,
             ESP_LOGI( TAG,
                       "Task \"%s\" waiting for publish %" PRIu32 " to complete.",
                       pcTaskGetName( NULL ),
-                      ulPublishMessageId );
+                      ulMessageId );
 
             xReceivedEvent = prvWaitForEvent( xMqttEventGroup,
                                               MQTT_PUBLISH_COMMAND_COMPLETED_BIT );
@@ -353,13 +341,13 @@ static void prvPublishToTopic( MQTTQoS_t xQoS,
         {
             ESP_LOGW( TAG,
                       "Error or timed out waiting for ack for publish message %" PRIu32 ". Re-attempting publish.",
-                      ulPublishMessageId );
+                      ulMessageId );
         }
         else
         {
             ESP_LOGI( TAG,
                       "Publish %" PRIu32 " succeeded for task \"%s\".",
-                      ulPublishMessageId,
+                      ulMessageId,
                       pcTaskGetName( NULL ) );
         }
     } while( ( xReceivedEvent & MQTT_PUBLISH_COMMAND_COMPLETED_BIT ) == 0 ||
@@ -380,7 +368,8 @@ static void prvQuickConnectV2Task( void * pvParameters )
 
     xMqttEventGroup = xEventGroupCreate();
 
-    xQoS = ( MQTTQoS_t ) quickconnectv2configQOS_LEVEL;
+    /* The MQTT QoS value is set to 1 */
+    xQoS = ( MQTTQoS_t ) 1;
 
     /* Take the topic name from thing name. */
     snprintf( pcTopicBuffer,
@@ -388,14 +377,23 @@ static void prvQuickConnectV2Task( void * pvParameters )
               "%s",
               configCLIENT_IDENTIFIER );
 
+    /* Initialize temperature sensor */
+    temperature_sensor_config_t temp_sensor_config = TEMPERATURE_SENSOR_CONFIG_DEFAULT(-10, 80);
+    ESP_ERROR_CHECK(temperature_sensor_install(&temp_sensor_config, &temp_sensor));
+    ESP_ERROR_CHECK(temperature_sensor_enable(temp_sensor));
+
     while( 1 )
     {
-        temperatureValue = app_driver_temp_sensor_read_celsius();
+        esp_err_t ret = temperature_sensor_get_celsius(temp_sensor, &temperatureValue);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to read temperature: %s", esp_err_to_name(ret));
+            temperatureValue = 25.0; /* Default fallback value */ 
+        }
         
         /* Create Payload in an Array format */
         snprintf( pcPayload,
                   quickconnectv2configSTRING_BUFFER_LENGTH,
-                  "[{\"label\":\"ESP32-S3 MCU Temperature\",\"display_type\":\"line_graph\",\"unit\":\"C\",\"values\":[{\"value\":%.1f,\"label\":\"temp\"}]}]",
+                  "[{\"label\":\"ESP32 MCU Temperature\",\"display_type\":\"line_graph\",\"unit\":\"C\",\"values\":[{\"value\":%.1f,\"label\":\"temp\"}]}]",
                   temperatureValue );
 
         prvPublishToTopic( xQoS,
@@ -422,12 +420,11 @@ static void prvQuickConnectV2Task( void * pvParameters )
 /* Public function definitions ************************************************/
 
 void vStartQuickConnectV2Demo( void )
-{
-    static struct DemoParams pxParams[ quickconnectv2configNUM_TASKS_TO_CREATE ];
-    char pcTaskNameBuf[ 30 ];
+{   /* This is a single task demo*/
+    static struct DemoParams pxParams[ 1 ];
+    char pcTaskNameBuf[ 15 ];
     uint32_t ulTaskNumber;
 
-    xMessageIdSemaphore = xSemaphoreCreateMutex();
     xNetworkEventGroup = xEventGroupCreate();
     xCoreMqttAgentManagerRegisterHandler( prvCoreMqttAgentEventHandler );
 
@@ -439,14 +436,14 @@ void vStartQuickConnectV2Demo( void )
      * name and topic filter for itself from the number passed in as the task
      * parameter. */
     /* Create a few instances of prvQuickConnectV2Task(). */
-    for( ulTaskNumber = 0; ulTaskNumber < quickconnectv2configNUM_TASKS_TO_CREATE; ulTaskNumber++ )
+    for( ulTaskNumber = 0; ulTaskNumber < 1; ulTaskNumber++ )
     {
         memset( pcTaskNameBuf,
                 0x00,
                 sizeof( pcTaskNameBuf ) );
 
         snprintf( pcTaskNameBuf,
-                  30,
+                  10,
                   "DemoTask");
 
         pxParams[ ulTaskNumber ].ulTaskNumber = ulTaskNumber;
@@ -455,7 +452,7 @@ void vStartQuickConnectV2Demo( void )
                      pcTaskNameBuf,
                      quickconnectv2configTASK_STACK_SIZE,
                      ( void * ) &pxParams[ ulTaskNumber ],
-                     quickconnectv2configTASK_PRIORITY,
+                     1, /* Task Priority */
                      NULL );
     }
 }

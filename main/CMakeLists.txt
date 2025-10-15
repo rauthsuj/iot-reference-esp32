@@ -17,7 +17,6 @@ endif()
 if(CONFIG_GRI_ENABLE_QUICKCONNECT_V2_DEMO)
     list(APPEND MAIN_SRCS 
         "demo_tasks/quickconnect_v2_demo/quickconnect_v2_demo.c"
-        "demo_tasks/temp_sub_pub_and_led_control_demo/hardware_drivers/app_driver.c"
     )
 endif()
 
@@ -65,6 +64,7 @@ set(MAIN_REQUIRES
     FreeRTOS-Libraries-Integration-Tests
     unity
     driver
+    esp_driver_tsens
 )
 
 idf_component_register(
