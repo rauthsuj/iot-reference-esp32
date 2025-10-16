@@ -25,20 +25,16 @@
  */
 
 /*
- * This file demonstrates numerous tasks all of which use the core-MQTT Agent API
- * to send unique MQTT payloads to unique topics over the same MQTT connection
- * to the same coreMQTT-Agent.
+ * This file demonstrates the Quick Connect V2 demo which uses the core-MQTT Agent API
+ * to publish ESP32 temperature sensor data to an MQTT broker without requiring AWS account setup.
  *
- * Each created task is a unique instance of the task implemented by
- * prvQuickConnectV2Task().  prvQuickConnectV2Task()
- * subscribes to a topic, publishes a message to the same
- * topic, receives the message, then unsubscribes from the topic in a loop.
- * The command context sent to MQTTAgent_Publish() contains a unique number that is sent back to the task
- * as a task notification from the callback function that executes when the
- * operations are acknowledged (or just sent in the case of QoS 0).  The
- * task checks the number it receives from the callback equals the number it
- * previously set in the command context before printing out either a success
- * or failure message.
+ * The demo creates a single task that reads the onboard temperature sensor and publishes
+ * the temperature data in JSON format to a topic named after the thing name.
+ * The task uses QoS 1 for reliable message delivery and includes error handling for
+ * sensor read failures with a fallback temperature value.
+ *
+ * This demo is designed for quick testing and development without the complexity
+ * of AWS IoT Core provisioning and certificate management.
  */
 
 /* Includes *******************************************************************/
@@ -88,7 +84,6 @@
 
 /* coreMQTT-Agent event group bit definitions */
 #define CORE_MQTT_AGENT_CONNECTED_BIT              ( 1 << 0 )
-#define CORE_MQTT_AGENT_OTA_NOT_IN_PROGRESS_BIT    ( 1 << 1 )
 
 /* MQTT event group bit definitions. */
 #define MQTT_PUBLISH_COMMAND_COMPLETED_BIT         ( 1 << 1 )
@@ -104,14 +99,6 @@ struct MQTTAgentCommandContext
     MQTTStatus_t xReturnStatus;
     EventGroupHandle_t xMqttEventGroup;
     void * pArgs;
-};
-
-/**
- * @brief Parameters for this task.
- */
-struct DemoParams
-{
-    uint32_t ulTaskNumber;
 };
 
 /* Global variables ***********************************************************/
@@ -131,7 +118,7 @@ extern MQTTAgentContext_t xGlobalMqttAgentContext;
  Topic filter value will be the Thing-Name. 
  *
  */
-static char topicBuf[ 1 ][ quickconnectv2configSTRING_BUFFER_LENGTH ];
+static char topicBuf[ quickconnectv2configSTRING_BUFFER_LENGTH ];
 
 /**
  * @brief The event group used to manage coreMQTT-Agent events.
@@ -299,9 +286,9 @@ static void prvPublishToTopic( MQTTQoS_t xQoS,
     {
         /* Wait for coreMQTT-Agent task to have working network connection */
         xEventGroupWaitBits( xNetworkEventGroup,
-                             CORE_MQTT_AGENT_CONNECTED_BIT | CORE_MQTT_AGENT_OTA_NOT_IN_PROGRESS_BIT,
+                             CORE_MQTT_AGENT_CONNECTED_BIT,
                              pdFALSE,
-                             pdTRUE,
+                             pdFALSE,
                              portMAX_DELAY );
 
         ESP_LOGI( TAG,
@@ -317,7 +304,7 @@ static void prvPublishToTopic( MQTTQoS_t xQoS,
 
         if( xCommandAdded == MQTTSuccess )
         {
-            /* For QoS 1 and 2, wait for the publish acknowledgment.  For QoS0,
+            /* For QoS 1, wait for the publish acknowledgment.  For QoS0,
              * wait for the publish to be sent. */
             ESP_LOGI( TAG,
                       "Task \"%s\" waiting for publish %" PRIu32 " to complete.",
@@ -356,13 +343,9 @@ static void prvPublishToTopic( MQTTQoS_t xQoS,
 
 static void prvQuickConnectV2Task( void * pvParameters )
 {
-    struct DemoParams * pxParams = ( struct DemoParams * ) pvParameters;
-    uint32_t ulTaskNumber = pxParams->ulTaskNumber;
-
     EventGroupHandle_t xMqttEventGroup;
 
     MQTTQoS_t xQoS;
-    char * pcTopicBuffer = topicBuf[ ulTaskNumber ];
     char pcPayload[ quickconnectv2configSTRING_BUFFER_LENGTH ];
     float temperatureValue;
 
@@ -372,7 +355,7 @@ static void prvQuickConnectV2Task( void * pvParameters )
     xQoS = ( MQTTQoS_t ) 1;
 
     /* Take the topic name from thing name. */
-    snprintf( pcTopicBuffer,
+    snprintf( topicBuf,
               quickconnectv2configSTRING_BUFFER_LENGTH,
               "%s",
               configCLIENT_IDENTIFIER );
@@ -397,7 +380,7 @@ static void prvQuickConnectV2Task( void * pvParameters )
                   temperatureValue );
 
         prvPublishToTopic( xQoS,
-                           pcTopicBuffer,
+                           topicBuf,
                            pcPayload,
                            xMqttEventGroup );
 
@@ -421,20 +404,12 @@ static void prvQuickConnectV2Task( void * pvParameters )
 
 void vStartQuickConnectV2Demo( void )
 {   /* This is a single task demo*/
-    static struct DemoParams pxParams[ 1 ];
     char pcTaskNameBuf[ 15 ];
     uint32_t ulTaskNumber;
 
     xNetworkEventGroup = xEventGroupCreate();
     xCoreMqttAgentManagerRegisterHandler( prvCoreMqttAgentEventHandler );
 
-    /* Initialize the coreMQTT-Agent event group. */
-    xEventGroupSetBits( xNetworkEventGroup,
-                        CORE_MQTT_AGENT_OTA_NOT_IN_PROGRESS_BIT );
-
-    /* Each instance of prvQuickConnectV2Task() generates a unique
-     * name and topic filter for itself from the number passed in as the task
-     * parameter. */
     /* Create a few instances of prvQuickConnectV2Task(). */
     for( ulTaskNumber = 0; ulTaskNumber < 1; ulTaskNumber++ )
     {
@@ -446,12 +421,10 @@ void vStartQuickConnectV2Demo( void )
                   10,
                   "DemoTask");
 
-        pxParams[ ulTaskNumber ].ulTaskNumber = ulTaskNumber;
-
         xTaskCreate( prvQuickConnectV2Task,
                      pcTaskNameBuf,
                      quickconnectv2configTASK_STACK_SIZE,
-                     ( void * ) &pxParams[ ulTaskNumber ],
+                     NULL,
                      1, /* Task Priority */
                      NULL );
     }
