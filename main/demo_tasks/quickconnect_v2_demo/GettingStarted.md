@@ -24,7 +24,7 @@ For hardware and software requirements, refer to sections [1.1 Hardware Requirem
 
 ### 2.1 Get credentials from Quick Connect V2
 
-To get credentials for your device (Thing), visit [Quick Connect Credentials](https://quickconnect.freertos.aws.com/credentials) page and enter a desired device name (Thing Name) in the `Vend Credentials` section, and click the Vend button. Download both the `.crt` and `.key` files. These are your **PEM-encoded device certificate** and **PEM-encoded private key**. (An explanation of these entities is given in the [AWS IoT Core Setup Guide](AWSSetup.md).)
+To get credentials for your device (Thing), visit [Quick Connect Credentials](https://quickconnect.freertos.aws.com/credentials) page and enter a desired device name (Thing Name) in the `Vend Credentials` section, and click the Vend button. Download both the `.crt` and `.key` files. These are your **PEM-encoded device certificate** and **PEM-encoded private key**. (An explanation of these entities is given in the [AWS IoT Core Setup Guide](../../../AWSSetup.md).)
 
 ### 2.2 Configure the project with the AWS IoT Thing Name and AWS device Endpoint
 
