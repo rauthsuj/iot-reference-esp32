@@ -113,8 +113,8 @@ static const char * TAG = "quickconnect_v2_demo";
 extern MQTTAgentContext_t xGlobalMqttAgentContext;
 
 /**
- * @brief The buffer to hold the topic filter. 
- * Topic filter value will be the Thing-Name. 
+ * @brief The buffer to hold the topic filter.
+ * Topic filter value will be the Thing-Name.
  *
  */
 static char topicBuf[ quickconnectconfigSTRING_BUFFER_LENGTH ];
@@ -361,7 +361,7 @@ static void prvQuickConnectV2Task( void * pvParameters )
     {
         /* Read temperature from sensor */
         temperatureValue = app_driver_temp_sensor_read_celsius();
-        
+
         /* Create Payload in an Array format */
         snprintf( pcPayload,
                   quickconnectconfigSTRING_BUFFER_LENGTH,
