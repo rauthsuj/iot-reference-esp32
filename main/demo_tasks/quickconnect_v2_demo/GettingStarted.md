@@ -28,9 +28,11 @@ To get credentials for your device (Thing), visit [Quick Connect Credentials](ht
 
 ### 2.2 Configure the project with the AWS IoT Thing Name and AWS device Endpoint
 
-The **AWS device Endpoint** is provided on the [Quick Connect Examples](https://quickconnect.freertos.aws.com/examples) page.
+The **AWS device Endpoint** is provided on the [Quick Connect Examples](https://quickconnect.freertos.aws.com/examples) page in the sample program code under the ENDPOINT variable.
 
 Follow the [2.2 Configure the project](../../../GettingStartedGuide.md#22-configure-the-project-with-the-aws-iot-thing-name-and-aws-device-endpoint) section in the [Getting Started Guide](../../../GettingStartedGuide.md) to configure your project.
+
+Select `Enable QuickConnect V2 demo` in the `Featured FreeRTOS IoT Integration` to activate the demo.
 
 
 ### 2.3 Provision the ESP32-C3 with the private key, device certificate and CA certificate in Development Mode

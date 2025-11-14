@@ -40,24 +40,24 @@
  * @brief Size of statically allocated buffers for holding topic names and
  * payloads.
  */
-#define quickconnectv2configSTRING_BUFFER_LENGTH                    ( ( unsigned int ) ( CONFIG_GRI_QUICKCONNECT_V2_DEMO_STRING_BUFFER_LENGTH ) )
+#define quickconnectconfigSTRING_BUFFER_LENGTH              ( ( unsigned int ) ( CONFIG_GRI_QUICKCONNECT_V2_DEMO_STRING_BUFFER_LENGTH ) )
 
 /**
  * @brief Delay for each task between each publish.
  */
-#define quickconnectv2configDELAY_BETWEEN_LOOPS_MS    ( ( unsigned int ) ( CONFIG_GRI_QUICKCONNECT_V2_DEMO_DELAY_BETWEEN_PUB_LOOPS_MS ) )
+#define quickconnectconfigDELAY_BETWEEN_LOOPS_MS            ( ( unsigned int ) ( CONFIG_GRI_QUICKCONNECT_V2_DEMO_DELAY_BETWEEN_PUB_LOOPS_MS ) )
 
 /**
  * @brief The maximum amount of time in milliseconds to wait for the commands
  * to be posted to the MQTT agent should the MQTT agent's command queue be full.
  * Tasks wait in the Blocked state, so don't use any CPU time.
  */
-#define quickconnectv2configMAX_COMMAND_SEND_BLOCK_TIME_MS          ( ( unsigned int ) ( CONFIG_GRI_QUICKCONNECT_V2_DEMO_MAX_COMMAND_SEND_BLOCK_TIME_MS ) )
+#define quickconnectconfigMAX_COMMAND_SEND_BLOCK_TIME_MS    ( ( unsigned int ) ( CONFIG_GRI_QUICKCONNECT_V2_DEMO_MAX_COMMAND_SEND_BLOCK_TIME_MS ) )
 
 /**
  * @brief The task stack size for each of the Quick Connect Demo tasks.
  */
-#define quickconnectv2configTASK_STACK_SIZE                         ( ( unsigned int ) ( CONFIG_GRI_QUICKCONNECT_V2_DEMO_TASK_STACK_SIZE ) )
+#define quickconnectconfigTASK_STACK_SIZE                   ( ( unsigned int ) ( CONFIG_GRI_QUICKCONNECT_V2_DEMO_TASK_STACK_SIZE ) )
 
 /* *INDENT-OFF* */
     #ifdef __cplusplus

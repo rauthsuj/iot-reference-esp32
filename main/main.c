@@ -257,10 +257,10 @@ static void prvStartEnabledDemos( void )
     BaseType_t xResult;
 
     #if ( CONFIG_GRI_RUN_QUALIFICATION_TEST == 0 )
-         #if CONFIG_GRI_ENABLE_QUICKCONNECT_V2_DEMO
+        #if CONFIG_GRI_ENABLE_QUICKCONNECT_V2_DEMO
             vStartQuickConnectV2Demo();
         #endif /* CONFIG_GRI_ENABLE_QUICKCONNECT_V2_DEMO */
-        
+
         #if CONFIG_GRI_ENABLE_SUB_PUB_UNSUB_DEMO
             vStartSubscribePublishUnsubscribeDemo();
         #endif /* CONFIG_GRI_ENABLE_SIMPLE_PUB_SUB_DEMO */

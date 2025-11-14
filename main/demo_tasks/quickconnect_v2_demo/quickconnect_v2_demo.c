@@ -75,7 +75,6 @@
 
 /* Hardware drivers include. */
 #include "app_driver.h"
-#include "driver/temperature_sensor.h"
 
 /* coreMQTT-Agent manager configurations include. */
 #include "core_mqtt_agent_manager_config.h"
@@ -83,10 +82,10 @@
 /* Preprocessor definitions ***************************************************/
 
 /* coreMQTT-Agent event group bit definitions */
-#define CORE_MQTT_AGENT_CONNECTED_BIT              ( 1 << 0 )
+#define CORE_MQTT_AGENT_CONNECTED_BIT         ( 1 << 0 )
 
 /* MQTT event group bit definitions. */
-#define MQTT_PUBLISH_COMMAND_COMPLETED_BIT         ( 1 << 1 )
+#define MQTT_PUBLISH_COMMAND_COMPLETED_BIT    ( 1 << 1 )
 
 /* Struct definitions *********************************************************/
 
@@ -115,10 +114,10 @@ extern MQTTAgentContext_t xGlobalMqttAgentContext;
 
 /**
  * @brief The buffer to hold the topic filter. 
- Topic filter value will be the Thing-Name. 
+ * Topic filter value will be the Thing-Name. 
  *
  */
-static char topicBuf[ quickconnectv2configSTRING_BUFFER_LENGTH ];
+static char topicBuf[ quickconnectconfigSTRING_BUFFER_LENGTH ];
 
 /**
  * @brief The event group used to manage coreMQTT-Agent events.
@@ -129,11 +128,6 @@ static EventGroupHandle_t xNetworkEventGroup;
  * @brief The message ID for the next message sent by this demo.
  */
 static uint32_t ulMessageId = 0;
-
-/**
- * @brief Temperature sensor handle.
- */
-static temperature_sensor_handle_t temp_sensor = NULL;
 
 /* Static function declarations ***********************************************/
 
@@ -177,7 +171,7 @@ static void prvPublishCommandCallback( MQTTAgentCommandContext_t * pxCommandCont
  */
 static EventBits_t prvWaitForEvent( EventGroupHandle_t xMqttEventGroup,
                                     EventBits_t uxBitsToWaitFor );
-                                    
+
 /**
  * @brief The function that implements the task demonstrated by this file.
  */
@@ -278,7 +272,7 @@ static void prvPublishToTopic( MQTTQoS_t xQoS,
      * until the callback executes. */
     xCommandContext.xMqttEventGroup = xMqttEventGroup;
 
-    xCommandParams.blockTimeMs = quickconnectv2configMAX_COMMAND_SEND_BLOCK_TIME_MS;
+    xCommandParams.blockTimeMs = quickconnectconfigMAX_COMMAND_SEND_BLOCK_TIME_MS;
     xCommandParams.cmdCompleteCallback = prvPublishCommandCallback;
     xCommandParams.pCmdCompleteCallbackContext = &xCommandContext;
 
@@ -346,7 +340,7 @@ static void prvQuickConnectV2Task( void * pvParameters )
     EventGroupHandle_t xMqttEventGroup;
 
     MQTTQoS_t xQoS;
-    char pcPayload[ quickconnectv2configSTRING_BUFFER_LENGTH ];
+    char pcPayload[ quickconnectconfigSTRING_BUFFER_LENGTH ];
     float temperatureValue;
 
     xMqttEventGroup = xEventGroupCreate();
@@ -356,26 +350,21 @@ static void prvQuickConnectV2Task( void * pvParameters )
 
     /* Take the topic name from thing name. */
     snprintf( topicBuf,
-              quickconnectv2configSTRING_BUFFER_LENGTH,
+              quickconnectconfigSTRING_BUFFER_LENGTH,
               "%s",
               configCLIENT_IDENTIFIER );
 
-    /* Initialize temperature sensor */
-    temperature_sensor_config_t temp_sensor_config = TEMPERATURE_SENSOR_CONFIG_DEFAULT(-10, 80);
-    ESP_ERROR_CHECK(temperature_sensor_install(&temp_sensor_config, &temp_sensor));
-    ESP_ERROR_CHECK(temperature_sensor_enable(temp_sensor));
+    /* Initialize hardware drivers */
+    app_driver_init();
 
     while( 1 )
     {
-        esp_err_t ret = temperature_sensor_get_celsius(temp_sensor, &temperatureValue);
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to read temperature: %s", esp_err_to_name(ret));
-            temperatureValue = 25.0; /* Default fallback value */ 
-        }
+        /* Read temperature from sensor */
+        temperatureValue = app_driver_temp_sensor_read_celsius();
         
         /* Create Payload in an Array format */
         snprintf( pcPayload,
-                  quickconnectv2configSTRING_BUFFER_LENGTH,
+                  quickconnectconfigSTRING_BUFFER_LENGTH,
                   "[{\"label\":\"ESP32 MCU Temperature\",\"display_type\":\"line_graph\",\"unit\":\"C\",\"values\":[{\"value\":%.1f,\"label\":\"temp\"}]}]",
                   temperatureValue );
 
@@ -393,7 +382,7 @@ static void prvQuickConnectV2Task( void * pvParameters )
                   "Task \"%s\" completed a loop. Delaying before next loop.",
                   pcTaskGetName( NULL ) );
 
-        vTaskDelay( pdMS_TO_TICKS( quickconnectv2configDELAY_BETWEEN_LOOPS_MS ) );
+        vTaskDelay( pdMS_TO_TICKS( quickconnectconfigDELAY_BETWEEN_LOOPS_MS ) );
     }
 
     vEventGroupDelete( xMqttEventGroup );
@@ -403,7 +392,7 @@ static void prvQuickConnectV2Task( void * pvParameters )
 /* Public function definitions ************************************************/
 
 void vStartQuickConnectV2Demo( void )
-{   /* This is a single task demo*/
+{ /* This is a single task demo*/
     char pcTaskNameBuf[ 15 ];
     uint32_t ulTaskNumber;
 
@@ -419,11 +408,11 @@ void vStartQuickConnectV2Demo( void )
 
         snprintf( pcTaskNameBuf,
                   10,
-                  "DemoTask");
+                  "DemoTask" );
 
         xTaskCreate( prvQuickConnectV2Task,
                      pcTaskNameBuf,
-                     quickconnectv2configTASK_STACK_SIZE,
+                     quickconnectconfigTASK_STACK_SIZE,
                      NULL,
                      1, /* Task Priority */
                      NULL );
