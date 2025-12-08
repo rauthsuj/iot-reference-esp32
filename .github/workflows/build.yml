@@ -23,7 +23,7 @@ jobs:
           - v5.0
           - v5.1.2
           - release-v5.2
-          - latest
+          - v5.5.1
         esp_target:
           - esp32
           - esp32s2
