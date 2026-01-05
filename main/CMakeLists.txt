@@ -54,7 +54,7 @@ set(MAIN_INCLUDE_DIRS
 
 set(MAIN_REQUIRES
     qrcode
-    network_provisioning
+    wifi_provisioning
     coreMQTT
     coreMQTT-Agent
     corePKCS11
