@@ -67,6 +67,8 @@ set(MAIN_REQUIRES
     driver
 )
 
+set(EXCLUDE_COMPONENTS wifi_provisioning)
+
 idf_component_register(
     SRCS
         ${MAIN_SRCS}
