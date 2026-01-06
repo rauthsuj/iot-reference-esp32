@@ -45,7 +45,6 @@ set(MAIN_INCLUDE_DIRS
 
 set(MAIN_REQUIRES
     qrcode
-    wifi_provisioning
     coreMQTT
     coreMQTT-Agent
     corePKCS11
@@ -57,6 +56,8 @@ set(MAIN_REQUIRES
     unity
     driver
 )
+
+set(EXCLUDE_COMPONENTS wifi_provisioning)
 
 idf_component_register(
     SRCS
