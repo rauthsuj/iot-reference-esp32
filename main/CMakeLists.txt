@@ -66,6 +66,8 @@ set(MAIN_REQUIRES
     driver
 )
 
+# Exclude wifi_provisioning component to avoid conflicts with network_provisioning
+# See: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/migration-guides/release-6.x/6.0/provisioning.html
 set(EXCLUDE_COMPONENTS wifi_provisioning)
 
 idf_component_register(
