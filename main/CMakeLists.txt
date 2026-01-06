@@ -64,6 +64,7 @@ set(MAIN_REQUIRES
     FreeRTOS-Libraries-Integration-Tests
     unity
     driver
+    mbedtls
 )
 
 set(EXCLUDE_COMPONENTS wifi_provisioning)
